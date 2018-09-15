@@ -76,6 +76,21 @@ public class GraphicsTool {
         GL.PopMatrix();
     }
 
+    public static void DrawLine(Vector2 begin, Vector2 end, Material mat)
+    {
+        mat.SetPass(0);
+
+        GL.PushMatrix();
+        GL.LoadPixelMatrix(); //转成屏幕坐标
+
+        GL.Begin(GL.LINES);
+        GL.Vertex3(begin.x, begin.y, 0);
+        GL.Vertex3(end.x, end.y, 0);
+        GL.End();
+
+        GL.PopMatrix();
+    }
+
     public static void DrawPoint(Vector2 center, float size, Material mat)
     {
         mat.SetPass(0);
