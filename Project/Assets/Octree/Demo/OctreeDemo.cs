@@ -9,7 +9,7 @@ public class OctreeDemo : MonoBehaviour
 
     void Start()
     {
-        m_octree = new Octree<BoxCollider>(new OctreeBound(0, 0, 0, m_maxSize), m_capacity, m_minSize);
+        m_octree = new Octree<BoxCollider>(new OctreeBound(m_maxSize / 2, m_maxSize / 2, m_maxSize / 2, m_maxSize), m_capacity, m_minSize);
 
         for (int i = 0; i < 10; i++)
         {

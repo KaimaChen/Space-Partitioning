@@ -140,9 +140,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1814041023}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6652658013e33744a775ead279266b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b8e39e18087a064a9448308b466e765, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_maxSize: 256
+  m_minSize: 0
+  m_capacity: 1
+  m_loose: 2
+  m_showLevel: -1
+  m_containsChildLevel: 0
+  m_showChild: -1
+  m_isQuery: 0
+  m_mouseRectWidth: 100
+  m_mouseRectHeight: 100
+  m_pointSize: 8
 --- !u!81 &1814041025
 AudioListener:
   m_ObjectHideFlags: 0

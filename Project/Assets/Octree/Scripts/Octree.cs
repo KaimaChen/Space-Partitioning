@@ -1,5 +1,10 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// 八叉树
+/// 松散八叉树很容易根据松散四叉树构建（基本逻辑都是一一对应的），这里就懒得实现了
+/// </summary>
+/// <typeparam name="T">存放的物品类型</typeparam>
 public class Octree<T>
 {
     //子节点索引含义
@@ -57,8 +62,7 @@ public class Octree<T>
         int overlapCount = BoundOverlapChildren(bound, ref overlapChild);
         if (overlapCount == 0)
         {
-            bool canSplit = m_bound.size > m_minSize;
-            if(!canSplit || m_items.Count < m_capacity)
+            if(m_items.Count < m_capacity || m_bound.size/2 < m_minSize)
             {
                 m_items.Add(new OctreeItem(elem, bound));
             }
@@ -185,15 +189,16 @@ public class Octree<T>
         float y = m_bound.center.y;
         float z = m_bound.center.z;
         float s = m_bound.size / 2;
+        float h = s / 2;
         m_children = new Octree<T>[8];
-        m_children[k_FBL] = new Octree<T>(new OctreeBound(x - s, y - s, z - s, s), m_capacity, m_minSize);
-        m_children[k_FBR] = new Octree<T>(new OctreeBound(x, y - s, z - s, s), m_capacity, m_minSize);
-        m_children[k_FTL] = new Octree<T>(new OctreeBound(x - s, y, z - s, s), m_capacity, m_minSize);
-        m_children[k_FTR] = new Octree<T>(new OctreeBound(x, y, z - s, s), m_capacity, m_minSize);
-        m_children[k_RBL] = new Octree<T>(new OctreeBound(x - s, y - s, z, s), m_capacity, m_minSize);
-        m_children[k_RBR] = new Octree<T>(new OctreeBound(x, y - s, z, s), m_capacity, m_minSize);
-        m_children[k_RTL] = new Octree<T>(new OctreeBound(x - s, y, z, s), m_capacity, m_minSize);
-        m_children[k_RTR] = new Octree<T>(new OctreeBound(x, y, z, s), m_capacity, m_minSize);
+        m_children[k_FBL] = new Octree<T>(new OctreeBound(x - h, y - h, z - h, s), m_capacity, m_minSize);
+        m_children[k_FBR] = new Octree<T>(new OctreeBound(x + h, y - h, z - h, s), m_capacity, m_minSize);
+        m_children[k_FTL] = new Octree<T>(new OctreeBound(x - h, y + h, z - h, s), m_capacity, m_minSize);
+        m_children[k_FTR] = new Octree<T>(new OctreeBound(x + h, y + h, z - h, s), m_capacity, m_minSize);
+        m_children[k_RBL] = new Octree<T>(new OctreeBound(x - h, y - h, z + h, s), m_capacity, m_minSize);
+        m_children[k_RBR] = new Octree<T>(new OctreeBound(x + h, y - h, z + h, s), m_capacity, m_minSize);
+        m_children[k_RTL] = new Octree<T>(new OctreeBound(x - h, y + h, z + h, s), m_capacity, m_minSize);
+        m_children[k_RTR] = new Octree<T>(new OctreeBound(x + h, y + h, z + h, s), m_capacity, m_minSize);
 
         List<OctreeItem> overlapItems = new List<OctreeItem>();
         for(int i = 0; i < m_items.Count; i++)

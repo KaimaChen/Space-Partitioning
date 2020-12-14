@@ -1,10 +1,10 @@
 # Game-Knowledge
-Some common used knowledge in creating game
+存放一些常见的游戏知识
 
-### Quad Tree
-Scene: **QuadTreeDemo**
-![](Img/QuadTreeDemo.bmp)
-
-Scene: **QuadTreeClickDemo**  
-Description: Left click can add point so that you can watch how a quad tree is built.
-![](Img/QuadTreeClickDemo.bmp)
+## 内容
+* (松散)四叉树
+  * [Github项目 四叉树/八叉树管理和动态加载场景物件](https://github.com/AsehesL/SceneSeparateDemo)
+* 八叉树
+  * 松散八叉树很容易根据松散四叉树实现，这里就不写重复代码了
+  * [Github项目 NetOctree](https://github.com/mcserep/NetOctree)
+* k-d树
