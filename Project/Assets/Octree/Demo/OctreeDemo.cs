@@ -9,8 +9,6 @@ public class OctreeDemo : MonoBehaviour
 
     void Start()
     {
-        m_octree = new Octree<BoxCollider>(new OctreeBound(m_maxSize / 2, m_maxSize / 2, m_maxSize / 2, m_maxSize), m_capacity, m_minSize);
-
         for (int i = 0; i < 10; i++)
         {
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -32,11 +30,20 @@ public class OctreeDemo : MonoBehaviour
         }
     }
 
-    void Update()
+    void OnGUI()
     {
+        GUILayout.Label("不用运行，直接在Octree物体下添加Cube来查看八叉树的构建");
+        GUILayout.Label("注意Cube要带BoxCollider");
+    }
+
+    void OnDrawGizmos()
+    {
+        if(m_octree == null)
+            m_octree = new Octree<BoxCollider>(new OctreeBound(m_maxSize / 2, m_maxSize / 2, m_maxSize / 2, m_maxSize), m_capacity, m_minSize);
+
         m_octree.Reset();
 
-        for(int i = 0; i < transform.childCount; i++)
+        for (int i = 0; i < transform.childCount; i++)
         {
             var e = transform.GetChild(i).GetComponent<BoxCollider>();
             if (e == null)
@@ -47,16 +54,7 @@ public class OctreeDemo : MonoBehaviour
             OctreeBound bound = new OctreeBound(bl, size);
             m_octree.Insert(e, bound);
         }
-    }
 
-    void OnGUI()
-    {
-        GUILayout.Label("在Octree物体下添加Cube来查看八叉树的构建");
-        GUILayout.Label("注意Cube要带BoxCollider");
-    }
-
-    void OnDrawGizmos()
-    {
         DrawOctree(m_octree);
     }
 

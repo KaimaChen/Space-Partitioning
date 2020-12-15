@@ -8,3 +8,5 @@
   * 松散八叉树很容易根据松散四叉树实现，这里就不写重复代码了
   * [Github项目 NetOctree](https://github.com/mcserep/NetOctree)
 * k-d树
+* BVH
+  * 参考 [GDC - DynamicBVH](https://box2d.org/files/ErinCatto_DynamicBVH_GDC2019.pdf)
