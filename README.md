@@ -10,3 +10,5 @@
 * k-d树
 * BVH
   * 参考 [GDC - DynamicBVH](https://box2d.org/files/ErinCatto_DynamicBVH_GDC2019.pdf)
+* BSP
+  * 参考 [Binary space partitioning](https://zhuanlan.zhihu.com/p/53388395)

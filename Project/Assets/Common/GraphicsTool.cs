@@ -39,7 +39,7 @@ public class GraphicsTool {
     }
 
     //画矩形
-    public static void DrawRect(Vector2 leftTop, Vector2 rightDown, bool isFill, Material mat)
+    public static void DrawRect(Vector2 bottomLeft, Vector2 topRight, bool isFill, Material mat)
     {
         mat.SetPass(0);
 
@@ -49,34 +49,34 @@ public class GraphicsTool {
         if(isFill)
         {
             GL.Begin(GL.QUADS);
-            GL.Vertex3(leftTop.x, leftTop.y, 0);
-            GL.Vertex3(rightDown.x, leftTop.y, 0);
-            GL.Vertex3(rightDown.x, rightDown.y, 0);
-            GL.Vertex3(leftTop.x, rightDown.y, 0);
+            GL.Vertex3(bottomLeft.x, bottomLeft.y, 0);
+            GL.Vertex3(bottomLeft.x, topRight.y, 0);
+            GL.Vertex3(topRight.x, topRight.y, 0);
+            GL.Vertex3(topRight.x, bottomLeft.y, 0);
         }
 
         
         GL.Begin(GL.LINES);
 
         //上边
-        GL.Vertex3(leftTop.x, leftTop.y, 0);
-        GL.Vertex3(rightDown.x, leftTop.y, 0);
+        GL.Vertex3(bottomLeft.x, topRight.y, 0);
+        GL.Vertex3(topRight.x, topRight.y, 0);
         //下边
-        GL.Vertex3(leftTop.x, rightDown.y, 0);
-        GL.Vertex3(rightDown.x, rightDown.y, 0);
+        GL.Vertex3(bottomLeft.x, bottomLeft.y, 0);
+        GL.Vertex3(topRight.x, bottomLeft.y, 0);
         //左边
-        GL.Vertex3(leftTop.x, leftTop.y, 0);
-        GL.Vertex3(leftTop.x, rightDown.y, 0);
+        GL.Vertex3(bottomLeft.x, topRight.y, 0);
+        GL.Vertex3(bottomLeft.x, bottomLeft.y, 0);
         //右边
-        GL.Vertex3(rightDown.x, leftTop.y, 0);
-        GL.Vertex3(rightDown.x, rightDown.y, 0);
+        GL.Vertex3(topRight.x, topRight.y, 0);
+        GL.Vertex3(topRight.x, bottomLeft.y, 0);
 
         GL.End();
 
         GL.PopMatrix();
     }
 
-    public static void DrawLine(Vector2 begin, Vector2 end, Material mat)
+    public static void DrawLine(Vector2 begin, Vector2 end, Material mat, bool drawNormal = false)
     {
         mat.SetPass(0);
 
@@ -86,6 +86,53 @@ public class GraphicsTool {
         GL.Begin(GL.LINES);
         GL.Vertex3(begin.x, begin.y, 0);
         GL.Vertex3(end.x, end.y, 0);
+
+        if (drawNormal)
+        {
+            Vector2 mid = (begin + end) / 2;
+            Vector2 dir = end - begin;
+            Vector2 n = new Vector2(-dir.y, dir.x).normalized;
+            end = mid + n * 3;
+            GL.Vertex3(mid.x, mid.y, 0);
+            GL.Vertex3(end.x, end.y, 0);
+        }
+        GL.End();
+
+        GL.PopMatrix();
+    }
+
+    public static void DrawDotLine(Vector2 begin, Vector2 end, Material mat, float dotLen, float dotGap)
+    {
+        mat.SetPass(0);
+
+        GL.PushMatrix();
+        GL.LoadPixelMatrix(); //转成屏幕坐标
+
+        GL.Begin(GL.LINES);
+        while (true)
+        {
+            Vector2 toEnd = end - begin;
+            float sqr = toEnd.sqrMagnitude;
+            if(sqr > dotLen * dotLen)
+            {
+                float len = Mathf.Sqrt(sqr);
+                Vector2 dir = toEnd / len;
+                Vector2 newEnd = begin + dir * dotLen;
+                GL.Vertex3(begin.x, begin.y, 0);
+                GL.Vertex3(newEnd.x, newEnd.y, 0);
+
+                if (len > dotLen + dotGap)
+                    begin += dir * (dotLen + dotGap);
+                else
+                    break;
+            }
+            else
+            {
+                GL.Vertex3(begin.x, begin.y, 0);
+                GL.Vertex3(end.x, end.y, 0);
+                break;
+            }
+        }
         GL.End();
 
         GL.PopMatrix();
