@@ -1,215 +1,194 @@
 ﻿using UnityEngine;
-using System.Text;
 
-public class KdTree
+namespace KdTree
 {
-    public const int K = 2;
-
-    public KdNode mRoot;
-    
-    KdNode InsertHelper(KdNode root, int[] values, int dim)
+    /// <summary>
+    /// kd树，这里实现2维的
+    /// 参考：
+    /// https://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/kdtrees.pdf
+    /// https://courses.cs.washington.edu/courses/cse373/02au/lectures/lecture22l.pdf 这个文章提供了另外一种构建方式
+    /// </summary>
+    public class KdTree
     {
-        if (root == null)
+        public const int K = 2;
+
+        private Node m_root;
+
+        public Node Root { get { return m_root; } }
+
+        public void Insert(Vector2 point)
         {
-            return new KdNode(values);
+            m_root = InsertHelper(m_root, point, 0);
         }
 
-        int index = dim % K;
-
-        if(root.IsLess(values, index))
+        public Node Find(Vector2 point)
         {
-            root.mRight = InsertHelper(root.mRight, values, dim + 1);
-        }
-        else
-        {
-            root.mLeft = InsertHelper(root.mLeft, values, dim + 1);
+            return FindHelper(m_root, point, 0);
         }
 
-        return root;
-    }
-
-    public void Insert(int[] values)
-    {
-        mRoot = InsertHelper(mRoot, values, 0);
-    }
-
-    KdNode FindHelper(KdNode root, int[] values, int dim)
-    {
-        if (root == null)
-            return null;
-
-        if (root.IsSame(values))
-            return root;
-
-        int index = dim % K;
-        if (root.IsLess(values, index))
-            return FindHelper(root.mRight, values, dim + 1);
-        else
-            return FindHelper(root.mLeft, values, dim + 1);
-    }
-
-    public KdNode Find(int[] values)
-    {
-        return FindHelper(mRoot, values, 0);
-    }
-
-    KdNode MinNode(KdNode a, KdNode b, KdNode c, int targetDim)
-    {
-        KdNode cur = a;
-        if (cur == null || (b != null && b.mValues[targetDim] < cur.mValues[targetDim]))
-            cur = b;
-
-        if (cur == null || (c != null && c.mValues[targetDim] < cur.mValues[targetDim]))
-            cur = c;
-
-        return cur;
-    }
-
-    KdNode FindMinHelper(KdNode root, int targetDim, int dim)
-    {
-        if (root == null)
-            return null;
-
-        int index = dim % K;
-
-        if(index == targetDim)
+        public Node FindMin(int targetDim)
         {
-            KdNode leftMin = FindMinHelper(root.mLeft, targetDim, dim + 1);
-            return MinNode(root, leftMin, null, targetDim);
+            return FindMinHelper(m_root, targetDim, 0);
         }
-        else
+
+        public Node Delete(Vector2 point)
         {
-            KdNode leftMin = FindMinHelper(root.mLeft, targetDim, dim + 1);
-            KdNode rightMin = FindMinHelper(root.mRight, targetDim, dim + 1);
-            return MinNode(root, leftMin, rightMin, targetDim);
+            return DeleteHelper(m_root, point, 0);
         }
-    }
 
-    public KdNode FindMin(int targetDim)
-    {
-        return FindMinHelper(mRoot, targetDim, 0);
-    }
-
-    KdNode DeleteHelper(KdNode root, int[] values, int dim)
-    {
-        if (root == null)
-            return null;
-
-        int index = dim % K;
-
-        if(root.IsSame(values))
+        public Node NearestNeighbor(Vector2 src, AABB2 box)
         {
-            if(root.mRight != null)
+            m_bestSqrDist = float.MaxValue;
+            m_bestNode = null;
+
+            NN(m_root, src, 0, box);
+
+            return m_bestNode;
+        }
+
+        Node InsertHelper(Node root, Vector2 point, int dim)
+        {
+            if (root == null)
+                return new Node(point);
+
+            int index = dim % K;
+
+            if (root.IsLess(point, index))
             {
-                KdNode minNode = FindMinHelper(root.mRight, index, dim + 1);
-                root.SetValues(minNode.mValues);
-                root.mRight = DeleteHelper(root.mRight, minNode.mValues, dim + 1);
+                root.Right = InsertHelper(root.Right, point, dim + 1);
             }
-            else if(root.mLeft != null)
-            {
-                KdNode minNode = FindMinHelper(root.mLeft, index, dim + 1);
-                root.SetValues(minNode.mValues);
-                root.mRight = DeleteHelper(root.mLeft, minNode.mValues, dim + 1);
-                root.mLeft = null;
-            }
-            else //left node, direct delete
-            {
-                return null;
-            }
-        }
-        else if(root.IsLess(values, index))
-        {
-            root.mRight = DeleteHelper(root.mRight, values, dim + 1);
-        }
-        else
-        {
-            root.mLeft = DeleteHelper(root.mLeft, values, dim + 1);
-        }
-
-        return root;
-    }
-
-    public KdNode Delete(int[] values)
-    {
-        return DeleteHelper(mRoot, values, 0);
-    }
-
-    #region Print
-    void PrintHelper(KdNode root, int level, bool isLeft = false)
-    {
-        if (root == null)
-            return;
-
-        StringBuilder sb = new StringBuilder();
-        
-        for (int i = 0; i < level; i++)
-            sb.Append("-");
-
-        if(level > 0)
-        {
-            if (isLeft)
-                sb.Append("L:");
             else
-                sb.Append("R:");
+            {
+                root.Left = InsertHelper(root.Left, point, dim + 1);
+            }
+
+            return root;
         }
 
-        sb.Append(root);
-
-        Debug.Log(sb.ToString());
-
-        PrintHelper(root.mLeft, level + 1, true);
-        PrintHelper(root.mRight, level + 1, false);
-    }
-
-    public void Print()
-    {
-        if (mRoot == null)
-            Debug.Log("Root is null");
-
-        PrintHelper(mRoot, 0);
-    }
-
-    int LINE_WIDTH = 5;
-    void ShowGraphHelper(KdNode root, int dim, Material mat, int minX, int maxX, int minY, int maxY)
-    {
-        if (root == null)
-            return;
-
-        mat.SetColor("_Color", Color.red);
-        GraphicsTool.DrawPoint(new Vector2(root.mValues[0], root.mValues[1]), 5, mat);
-        
-        mat.SetColor("_Color", Color.green);
-
-        if (dim %  2 == 0)
+        Node FindHelper(Node root, Vector2 point, int dim)
         {
-            int x = root.mValues[0];
-            
-            Vector2 begin = new Vector2(x, maxY);
-            Vector2 end = new Vector2(x, minY);
-            GraphicsTool.DrawLine(begin, end, mat);
+            if (root == null)
+                return null;
 
-            ShowGraphHelper(root.mLeft, dim + 1, mat, minX, x, minY, maxY);
-            ShowGraphHelper(root.mRight, dim + 1, mat, x, maxX, minY, maxY);
+            if (root.Pos == point)
+                return root;
+
+            int index = dim % K;
+            if (root.IsLess(point, index))
+                return FindHelper(root.Right, point, dim + 1);
+            else
+                return FindHelper(root.Left, point, dim + 1);
         }
-        else
+
+        Node MinNode(Node a, Node b, Node c, int targetDim)
         {
-            int y = root.mValues[1];
-            
-            Vector2 begin = new Vector2(minX, y);
-            Vector2 end = new Vector2(maxX, y);
-            GraphicsTool.DrawLine(begin, end, mat);
+            Node cur = a;
+            if (cur == null || (b != null && b.GetValue(targetDim) < cur.GetValue(targetDim)))
+                cur = b;
 
-            ShowGraphHelper(root.mLeft, dim + 1, mat, minX, maxX, minY, y);
-            ShowGraphHelper(root.mRight, dim + 1, mat, minX, maxX, y, maxY);
+            if (cur == null || (c != null && c.GetValue(targetDim) < cur.GetValue(targetDim)))
+                cur = c;
+
+            return cur;
+        }
+
+        Node FindMinHelper(Node root, int targetDim, int dim)
+        {
+            if (root == null)
+                return null;
+
+            int index = dim % K;
+
+            if (index == targetDim)
+            {
+                Node leftMin = FindMinHelper(root.Left, targetDim, dim + 1);
+                return MinNode(root, leftMin, null, targetDim);
+            }
+            else
+            {
+                Node leftMin = FindMinHelper(root.Left, targetDim, dim + 1);
+                Node rightMin = FindMinHelper(root.Right, targetDim, dim + 1);
+                return MinNode(root, leftMin, rightMin, targetDim);
+            }
+        }
+
+        Node DeleteHelper(Node root, Vector2 point, int dim)
+        {
+            if (root == null)
+                return null;
+
+            int index = dim % K;
+
+            if (root.Pos == point)
+            {
+                if (root.Right != null)
+                {
+                    //把右子树的最小节点作为根节点
+                    Node minNode = FindMinHelper(root.Right, index, dim + 1);
+                    root.Pos = minNode.Pos;
+                    root.Right = DeleteHelper(root.Right, minNode.Pos, dim + 1);
+                }
+                else if (root.Left != null)
+                {
+                    //把左子树的最小节点作为根节点，并把剩余左子树移到右子树
+                    Node minNode = FindMinHelper(root.Left, index, dim + 1);
+                    root.Pos = minNode.Pos;
+                    root.Right = DeleteHelper(root.Left, minNode.Pos, dim + 1);
+                    root.Left = null;
+                }
+                else //叶子节点直接移除
+                {
+                    return null;
+                }
+            }
+            else if (root.IsLess(point, index))
+            {
+                root.Right = DeleteHelper(root.Right, point, dim + 1);
+            }
+            else
+            {
+                root.Left = DeleteHelper(root.Left, point, dim + 1);
+            }
+
+            return root;
+        }
+
+        private float m_bestSqrDist;
+        private Node m_bestNode;
+        private void NN(Node curt, Vector2 src, int dim, AABB2 box)
+        {
+            if (curt == null)
+                return;
+
+            if (box.SqrDistance(src) > m_bestSqrDist)
+                return;
+
+            float sqrDist = (src - curt.Pos).sqrMagnitude;
+            if(sqrDist < m_bestSqrDist)
+            {
+                m_bestSqrDist = sqrDist;
+                m_bestNode = curt;
+            }
+
+            //先搜最可能在的地方，从而尽早裁剪掉不可能的地方
+            if(GetValue(src, dim) < curt.GetValue(dim))
+            {
+                NN(curt.Left, src, (dim + 1) % 2, AABB2.TrimLeft(box, curt.GetValue(dim), dim));
+                NN(curt.Right, src, (dim + 1) % 2, AABB2.TrimRight(box, curt.GetValue(dim), dim));
+            }
+            else
+            {
+                NN(curt.Right, src, (dim + 1) % 2, AABB2.TrimRight(box, curt.GetValue(dim), dim));
+                NN(curt.Left, src, (dim + 1) % 2, AABB2.TrimLeft(box, curt.GetValue(dim), dim));
+            }
+        }
+
+        private static float GetValue(Vector2 p, int dim)
+        {
+            if (dim % 2 == 0)
+                return p.x;
+            else
+                return p.y;
         }
     }
-
-    public void ShowGraph(Material mat)
-    {
-        if (mRoot == null)
-            return;
-
-        ShowGraphHelper(mRoot, 0, mat, 0, 1000, 0, 1000);
-    }
-    #endregion
 }

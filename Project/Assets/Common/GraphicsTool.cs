@@ -92,7 +92,7 @@ public class GraphicsTool {
             Vector2 mid = (begin + end) / 2;
             Vector2 dir = end - begin;
             Vector2 n = new Vector2(-dir.y, dir.x).normalized;
-            end = mid + n * 3;
+            end = mid + n * 5;
             GL.Vertex3(mid.x, mid.y, 0);
             GL.Vertex3(end.x, end.y, 0);
         }

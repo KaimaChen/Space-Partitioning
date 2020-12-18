@@ -20,7 +20,7 @@ public class BVHDemo : MonoBehaviour
                 continue;
 
             var bounds = e.bounds;
-            AABB box = new AABB() { lowerBound = bounds.min, upperBound = bounds.max };
+            AABB box = new AABB() { min = bounds.min, max = bounds.max };
             Item<GameObject> item = new Item<GameObject>(e.gameObject, box);
             m_bvh.Insert(item);
         }

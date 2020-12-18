@@ -140,7 +140,7 @@ public class LooseQuadTreeDemo : MonoBehaviour
     void DrawRect(QuadTreeBound bound, Color color)
     {
         m_mat.SetColor("_Color", color);
-        GraphicsTool.DrawRect(new Vector2(bound.xMin, bound.yMax), new Vector2(bound.xMax, bound.yMin), false, m_mat);
+        GraphicsTool.DrawRect(new Vector2(bound.xMin, bound.yMin), new Vector2(bound.xMax, bound.yMax), false, m_mat);
     }
 
     void DrawPoint(Vector2 point, Color color)
