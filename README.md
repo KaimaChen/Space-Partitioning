@@ -1,7 +1,4 @@
-# Game-Knowledge
-存放一些常见的游戏知识
-
-## 内容
+# Content
 * (松散)四叉树
   * [Github项目 四叉树/八叉树管理和动态加载场景物件](https://github.com/AsehesL/SceneSeparateDemo)
 * 八叉树
